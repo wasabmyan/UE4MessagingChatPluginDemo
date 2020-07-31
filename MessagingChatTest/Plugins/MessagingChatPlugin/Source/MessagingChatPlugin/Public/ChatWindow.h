@@ -8,14 +8,14 @@
 /**
  * 
  */
-class ChatWindow : public SCompoundWidget
+class SChatWindow : public SCompoundWidget
 {
 public:	
 	TSharedRef<STextBlock> DefaulTextBlock = SNew(STextBlock);
 	TWeakPtr<class FMessagingChatPluginModule> ChatPluginModule;
 public:
 	
-	SLATE_BEGIN_ARGS(ChatWindow) {}
+	SLATE_BEGIN_ARGS(SChatWindow) {}
 	SLATE_ARGUMENT(TWeakPtr<class FMessagingChatPluginModule>, ChatPluginModule)
 	SLATE_END_ARGS()
 

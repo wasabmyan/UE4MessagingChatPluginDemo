@@ -4,7 +4,7 @@
 #include "ChatWindow.h"
 #include "MessagingChatPlugin.h"
 
-void ChatWindow::Construct(const FArguments& InArgs)
+void SChatWindow::Construct(const FArguments& InArgs)
 {
 	
 	ChildSlot

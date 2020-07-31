@@ -128,7 +128,7 @@ TSharedRef<SWidget> FMessagingChatPluginModule::FillComboButton(TSharedPtr<FUICo
 
 TSharedRef<SDockTab> FMessagingChatPluginModule::OnSpawnChatWindow1(const FSpawnTabArgs& SpawnTabArgs)
 {		
-	TSharedRef<ChatWindow> TempChatWindow = SNew(ChatWindow);
+	TSharedRef<SChatWindow> TempChatWindow = SNew(SChatWindow);
 	TempChatWindow->DefaulTextBlock->SetText(FText::FromString("This is Messaging Chat Window 1"));
 
 	TSharedRef<SDockTab> SpawnedTab = SNew(SDockTab)
@@ -144,7 +144,7 @@ TSharedRef<SDockTab> FMessagingChatPluginModule::OnSpawnChatWindow1(const FSpawn
 
 TSharedRef<SDockTab> FMessagingChatPluginModule::OnSpawnChatWindow2(const FSpawnTabArgs& SpawnTabArgs)
 {
-	TSharedRef<ChatWindow> TempChatWindow = SNew(ChatWindow);
+	TSharedRef<SChatWindow> TempChatWindow = SNew(SChatWindow);
 	TempChatWindow->DefaulTextBlock->SetText(FText::FromString("This is Messaging Chat Window 2"));
 
 	TSharedRef<SDockTab> SpawnedTab = SNew(SDockTab)
