@@ -28,4 +28,6 @@ private:
 
 	void OnChat1ButtonClick();
 	void OnChat2ButtonClick();
+	
+	void OnTabClosed(TSharedRef<SDockTab> Tab);
 };

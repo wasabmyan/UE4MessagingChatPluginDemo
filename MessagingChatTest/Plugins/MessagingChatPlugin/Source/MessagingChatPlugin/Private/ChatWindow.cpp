@@ -3,6 +3,7 @@
 
 #include "ChatWindow.h"
 #include "MessagingChatPlugin.h"
+#include "MessageEndpointBuilder.h"
 
 void SChatWindow::Construct(const FArguments& InArgs)
 {
@@ -50,22 +51,31 @@ void SChatWindow::Construct(const FArguments& InArgs)
 			]
 		]
 	];
+
+	InitializeServer();
 }
 
 FReply SChatWindow::OnSendButtonClicked()
 {
-	//FString TempString = ChatEditableTextBox.Get().GetText().ToString();
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), *TempString);
 	if (!ChatEditableTextBox.Get().GetText().IsEmpty())
-	{
-		AddMessageText(FText::FromString("Me"), ChatEditableTextBox.Get().GetText());
+	{		
+		AddMessageText(FText::FromString("Me"), ChatEditableTextBox.Get().GetText(), FColor::Green);		
+		
+		// If the endpoint is valid then broadcast the messege to every subscribers
+		if (ChatMessageEndpoint.IsValid())
+		{
+			ChatMessageEndpoint->Publish<FChatMessage>(new  FChatMessage(Nickname, ChatEditableTextBox.Get().GetText().ToString()));
+		}
+
+		// Empty the chat box
 		ChatEditableTextBox.Get().SetText(FText::GetEmpty());
 	}
 	
 	return FReply::Handled();
 }
 
-void SChatWindow::AddMessageText(FText NickName, FText Message)
+// Add message to the chat window
+void SChatWindow::AddMessageText(FText NickName, FText Message, FColor TextColor)
 {
 	ChatScrollBox.Get().AddSlot()
 	[
@@ -77,7 +87,8 @@ void SChatWindow::AddMessageText(FText NickName, FText Message)
 		.AutoWidth()
 		[
 			SNew(STextBlock)
-			.Text(NickName)		
+			.Text(NickName)
+			.ColorAndOpacity(TextColor)
 		]
 
 		+ SHorizontalBox::Slot()
@@ -86,6 +97,7 @@ void SChatWindow::AddMessageText(FText NickName, FText Message)
 		[
 			SNew(STextBlock)
 			.Text(FText::FromString(": "))
+			.ColorAndOpacity(TextColor)
 		]
 		
 		+ SHorizontalBox::Slot()
@@ -94,6 +106,47 @@ void SChatWindow::AddMessageText(FText NickName, FText Message)
 		[
 			SNew(STextBlock)
 			.Text(Message)
+			.ColorAndOpacity(TextColor)
 		]
 	];
+}
+
+void SChatWindow::OnWindowClosed()
+{	
+	ShutdownServer();	
+}
+
+///////////////  MESSAGING CHAT EVENTS IMPLEMENTED /////////////
+
+void SChatWindow::InitializeServer()
+{
+	// Initialize an endpoint that waits for the chat message arrives and connect to the message bus. This will return nullptr when something fails.
+	ChatMessageEndpoint = FMessageEndpoint::Builder("ChatMessageEndpointName")
+		.Handling<FChatMessage>(this, &SChatWindow::ChatMessageHandler);
+
+	// If the endpoint is valid, we successfully connected to the message bus
+	if (ChatMessageEndpoint.IsValid())
+	{
+		ChatMessageEndpoint->Subscribe<FChatMessage>();
+	}
+}
+
+void SChatWindow::ShutdownServer()
+{	
+	// If the endpoint is valid then release the message endpoint, which disconnects from the message bus and stop listening for messages.
+	if (ChatMessageEndpoint.IsValid())
+	{
+		ChatMessageEndpoint.Reset();
+	}
+	
+}
+
+// Hanle the arrived message
+void SChatWindow::ChatMessageHandler(const FChatMessage& Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe>& Context)
+{
+	// Check if the sender address is not the same then add arrived message to the chat window
+	if (Context->GetSender() != ChatMessageEndpoint->GetAddress())
+	{
+		AddMessageText(FText::FromString(Message.Nickname), FText::FromString(Message.Message), FColor::Yellow);
+	}		
 }

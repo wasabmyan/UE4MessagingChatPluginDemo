@@ -116,6 +116,7 @@ void FMessagingChatPluginModule::FillSubmenu(FMenuBuilder& MenuBuilder)
 	MenuBuilder.AddMenuEntry(FMessagingChatPluginCommands::Get().ChatCommand2);
 }
 
+// Add Chat 1 and Chat 2 buttons 
 TSharedRef<SWidget> FMessagingChatPluginModule::FillComboButton(TSharedPtr<FUICommandList> Commands)
 {
 	FMenuBuilder MenuBuilder(true, Commands);
@@ -126,33 +127,36 @@ TSharedRef<SWidget> FMessagingChatPluginModule::FillComboButton(TSharedPtr<FUICo
 	return MenuBuilder.MakeWidget();
 }
 
+// Spawn chat window 1 and its contents
 TSharedRef<SDockTab> FMessagingChatPluginModule::OnSpawnChatWindow1(const FSpawnTabArgs& SpawnTabArgs)
 {		
+	UE_LOG(LogTemp, Warning, TEXT("OnSpawnChatWindow1"));
 	TSharedRef<SChatWindow> TempChatWindow = SNew(SChatWindow);
-
+	TempChatWindow->Nickname = FString(TEXT("Truong Bui 1"));;
 	TSharedRef<SDockTab> SpawnedTab = SNew(SDockTab)
 		.TabRole(ETabRole::NomadTab)
+		.OnTabClosed(SDockTab::FOnTabClosedCallback::CreateRaw(this, &FMessagingChatPluginModule::OnTabClosed))
 		[
 			// Tab contents
 			TempChatWindow
 		];	
 	
-
 	return SpawnedTab;
 }
 
+// Spawn chat window 2 and its contents
 TSharedRef<SDockTab> FMessagingChatPluginModule::OnSpawnChatWindow2(const FSpawnTabArgs& SpawnTabArgs)
 {
 	TSharedRef<SChatWindow> TempChatWindow = SNew(SChatWindow);
-
+	TempChatWindow->Nickname = FString(TEXT("Truong Bui 2"));;
 	TSharedRef<SDockTab> SpawnedTab = SNew(SDockTab)
 		.TabRole(ETabRole::NomadTab)
+		.OnTabClosed(SDockTab::FOnTabClosedCallback::CreateRaw(this, &FMessagingChatPluginModule::OnTabClosed))
 		[
 			// Tab contents
 			TempChatWindow
 		];
-
-
+	
 	return SpawnedTab;
 }
 
@@ -164,6 +168,17 @@ void FMessagingChatPluginModule::OnChat1ButtonClick()
 void FMessagingChatPluginModule::OnChat2ButtonClick()
 {
 	FGlobalTabmanager::Get()->InvokeTab(ChatWindowPluginTabName2);
+}
+
+// When closed tab, also shutdown the endpoint server in ChatWindow widget
+void FMessagingChatPluginModule::OnTabClosed(TSharedRef<SDockTab> Tab)
+{
+	TSharedPtr<SWidget> ChildWidget = Tab->GetChildren()->GetChildAt(0);
+	TSharedPtr<SChatWindow> TempChatWindow = StaticCastSharedPtr<SChatWindow>(ChildWidget);
+	if (TempChatWindow.IsValid())
+	{
+		TempChatWindow->OnWindowClosed();		
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
